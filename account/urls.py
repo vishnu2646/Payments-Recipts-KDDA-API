@@ -66,6 +66,6 @@ urlpatterns = [
     path("report/", ReportView.as_view(), name='report-view'),
 
     path('tiles/', tilesList, name='tile-data'),
-    path('expense/bar/', ExpenseBarChartView.as_view(), name='income-bar-chart'),
+    path('expense/bar/', ExpenseBarChartView.as_view(), name='expense-bar-chart'),
     path('income/bar/', IncomeBarChartView.as_view(), name='income-bar-chart'),
 ]

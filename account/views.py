@@ -25,6 +25,7 @@ from django.http import JsonResponse
 from django.db.models import Sum, DateField
 from django.db.models.functions import TruncMonth, Cast
 from account.renderers import UserRenderer
+from django.db import models
 
 # Generate Token Manually
 def get_tokens_for_user(user):
@@ -87,7 +88,7 @@ class UserPasswordResetView(APIView):
         return Response({'msg':'Password Reset Successfully'}, status=status.HTTP_200_OK)
 
 class LogoutView(APIView):
-    permission_classes = [permissions.IsAuthenticated]  # Only authenticated users can log out
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         try:
@@ -360,74 +361,46 @@ def tilesList(request):
 
 class ExpenseBarChartView(APIView):
     def get(self, request):
-        current_year = datetime.now().year
-
-        start_date = date(current_year, 4, 1)
-        end_date = date(current_year + 1, 3, 31)
-
+        # Group by 'mode' and sum the 'amount' for each mode
         expense_data = (
             Expense.objects
-            .annotate(date_as_date=Cast('date', DateField()))
-            .filter(date_as_date__range=(start_date, end_date))
-            .annotate(month=TruncMonth('date_as_date'))
-            .values('month')
-            .annotate(total_amount=Sum('amount'))
-            .order_by('month')
+            .values('expense_name')  # Group by the 'mode' field
+            .annotate(total_amount=Sum('amount'))  # Sum the 'amount' for each mode
+            .order_by('expense_name')  # Optionally, order by mode
         )
 
-        # Step 3: Convert month data to a dictionary
-        expense_dict = {item['month'].strftime('%B'): item['total_amount'] for item in expense_data}
-
-        # Step 4: Adjust the list of months from April to March (Fiscal year)
-        all_months = [
-            'April', 'May', 'June', 'July',
-            'August', 'September', 'October', 'November',
-            'December', 'January', 'February', 'March'
-        ]
-
-        # Step 5: Create the labels and fill in zeros for months with no data
-        labels = all_months
-        data = [expense_dict.get(month, 0) for month in labels]  # Use 0 if no data for the month
-
-        # Step 6: Return the chart data
+        # Prepare the data for the bar chart
         chart_data = {
-            'labels': labels,
-            'data': data
+            'labels': [],
+            'data': []
         }
+
+        # Populate the labels and data lists for the chart
+        for item in expense_data:
+            chart_data['labels'].append(item['expense_name'])
+            chart_data['data'].append(item['total_amount'])
 
         return Response(chart_data)
 
 class IncomeBarChartView(APIView):
     def get(self, request):
-        current_year = datetime.now().year
-
-        start_date = date(current_year, 4, 1)
-        end_date = date(current_year + 1, 3, 31)
-
+        # Group by 'mode' and sum the 'amount' for each mode
         income_data = (
             Income.objects
-            .annotate(date_as_date=Cast('date', DateField()))
-            .filter(date_as_date__range=(start_date, end_date))
-            .annotate(month=TruncMonth('date_as_date'))
-            .values('month')
-            .annotate(total_amount=Sum('amount'))
-            .order_by('month')
+            .values('income_name')  # Group by the 'mode' field
+            .annotate(total_amount=Sum('amount'))  # Sum the 'amount' for each mode
+            .order_by('income_name')  # Optionally, order by mode
         )
 
-        income_dict = {item['month'].strftime('%B'): item['total_amount'] for item in income_data}
-
-        all_months = [
-            'April', 'May', 'June', 'July',
-            'August', 'September', 'October', 'November',
-            'December', 'January', 'February', 'March'
-        ]
-
-        labels = all_months
-        data = [income_dict.get(month, 0) for month in labels]
-
+        # Prepare the data for the bar chart
         chart_data = {
-            'labels': labels,
-            'data': data
+            'labels': [],
+            'data': []
         }
+
+        # Populate the labels and data lists for the chart
+        for item in income_data:
+            chart_data['labels'].append(item['income_name'])
+            chart_data['data'].append(item['total_amount'])
 
         return Response(chart_data)
