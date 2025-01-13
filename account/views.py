@@ -191,7 +191,7 @@ def ExpenseList(requet):
 @api_view(['GET'])
 def ExpenseDetail(request, pk):
     if(request.user.is_authenticated):
-        expense = Expense.objects.get(id=pk)
+        expense = Expense.objects.get(expid=pk)
         serializer = GetExpenseSerializer(expense, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response("User is not authenticated", status=status.HTTP_401_UNAUTHORIZED)
@@ -209,15 +209,19 @@ class AddExpense(APIView):
 
 class UpdateExpense(APIView):
     def post(self, request, pk):
-        expense = Expense.objects.get(id=pk)
-        serializer = GetExpenseSerializer(instance=expense,data=request.data)
-        if(serializer.is_valid()):
+        try:
+            expense = Expense.objects.get(expid=pk)
+        except Expense.DoesNotExist:
+            return Response("Expense not found", status=status.HTTP_404_NOT_FOUND)        
+        serializer = GetExpenseSerializer(instance=expense, data=request.data)        
+        if serializer.is_valid():
             serializer.save()
-            return Response("Expense Updated successfully", status=status.HTTP_200_OK)
+            return Response("Expense updated successfully", status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
 def DeleteExpense(request, pk):
-    expense = Expense.objects.get(id=pk)
+    expense = Expense.objects.get(expid=pk)
     expense.delete()
     return Response("Expense Deleted successfully", status=status.HTTP_200_OK)
 
