@@ -212,8 +212,8 @@ class UpdateExpense(APIView):
         try:
             expense = Expense.objects.get(expid=pk)
         except Expense.DoesNotExist:
-            return Response("Expense not found", status=status.HTTP_404_NOT_FOUND)        
-        serializer = GetExpenseSerializer(instance=expense, data=request.data)        
+            return Response("Expense not found", status=status.HTTP_404_NOT_FOUND)
+        serializer = GetExpenseSerializer(instance=expense, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response("Expense updated successfully", status=status.HTTP_200_OK)
@@ -311,9 +311,16 @@ class ReportView(APIView):
 
             tot = sum(income['amount'] for income in incomeData)
 
+            lastYearIncomeTotal = 0
+
+            for opening in openingData:
+                lastYearIncomeTotal = opening['cashinhand'] + opening['cashatbank']
+
+            finalIncome = lastYearIncomeTotal + tot
+
             amt = sum(expense['amount'] for expense in expenseData)
 
-            fin = amt + tot
+            fin = finalIncome
 
             current_date = datetime.today()
 
@@ -322,7 +329,8 @@ class ReportView(APIView):
 
             b = 0
             for opening in openingData:
-                b = a - opening['cashatbankexp']
+                b = opening['cashatbankexp'] - a
+                print(opening, "opening")
 
             finexp = extot + a
 
