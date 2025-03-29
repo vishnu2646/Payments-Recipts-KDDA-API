@@ -148,9 +148,9 @@ def IncomeList(request):
     return Response('User is not authenticated', status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['GET'])
-def IncomeDetail(request, pk):
+def IncomeDetail(request, incid):
     if(request.user.is_authenticated):
-        income = Income.objects.get(id=pk)
+        income = Income.objects.get(incid=incid)
         serializer = GetIncomeSerializer(income, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response("User is not authenticated", status=status.HTTP_401_UNAUTHORIZED)
@@ -167,16 +167,16 @@ class AddIncome(APIView):
         return Response("User is not authorized to create a new income", status=status.HTTP_401_UNAUTHORIZED)
 
 class UpdateIncome(APIView):
-    def post(self, request, pk):
-        income = Income.objects.get(id=pk)
+    def post(self, request, incid):
+        income = Income.objects.get(incid=incid)
         serializer = GetIncomeSerializer(instance=income,data=request.data)
         if(serializer.is_valid()):
             serializer.save()
             return Response("Income Updated successfully", status=status.HTTP_200_OK)
 
 @api_view(['DELETE'])
-def DeleteIncome(request, pk):
-    income = Income.objects.get(id=pk)
+def DeleteIncome(request, incid):
+    income = Income.objects.get(incid=incid)
     income.delete()
     return Response("Income Deleted successfully", status=status.HTTP_200_OK)
 
@@ -189,9 +189,9 @@ def ExpenseList(requet):
     return Response('User is Not Authenticated', status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['GET'])
-def ExpenseDetail(request, pk):
+def ExpenseDetail(request, expid):
     if(request.user.is_authenticated):
-        expense = Expense.objects.get(expid=pk)
+        expense = Expense.objects.get(expid=expid)
         serializer = GetExpenseSerializer(expense, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response("User is not authenticated", status=status.HTTP_401_UNAUTHORIZED)
@@ -208,9 +208,9 @@ class AddExpense(APIView):
         return Response("User is not authorized to create a new expense", status=status.HTTP_401_UNAUTHORIZED)
 
 class UpdateExpense(APIView):
-    def post(self, request, pk):
+    def post(self, request, expid):
         try:
-            expense = Expense.objects.get(expid=pk)
+            expense = Expense.objects.get(expid=expid)
         except Expense.DoesNotExist:
             return Response("Expense not found", status=status.HTTP_404_NOT_FOUND)
         serializer = GetExpenseSerializer(instance=expense, data=request.data)
@@ -220,8 +220,8 @@ class UpdateExpense(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
-def DeleteExpense(request, pk):
-    expense = Expense.objects.get(expid=pk)
+def DeleteExpense(request, expid):
+    expense = Expense.objects.get(expid=expid)
     expense.delete()
     return Response("Expense Deleted successfully", status=status.HTTP_200_OK)
 
