@@ -29,7 +29,8 @@ from account.views import (
     AddOpening,
     ExpenseBarChartView,
     IncomeBarChartView,
-    LogoutView
+    LogoutView,
+    deleteAllIncomeAndExpenses
 )
 urlpatterns = [
     path('', apiOverView, name='api-overview'),
@@ -68,4 +69,6 @@ urlpatterns = [
     path('tiles/', tilesList, name='tile-data'),
     path('expense/bar/', ExpenseBarChartView.as_view(), name='expense-bar-chart'),
     path('income/bar/', IncomeBarChartView.as_view(), name='income-bar-chart'),
+
+    path('delete/all/', deleteAllIncomeAndExpenses, name='delete-all'),
 ]

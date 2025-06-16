@@ -352,6 +352,15 @@ class ReportView(APIView):
         return Response("User is not authorized", status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
+def deleteAllIncomeAndExpenses(request):
+    if(request.user.is_authenticated):
+        Income.objects.all().delete()
+        Expense.objects.all().delete()
+        Opening.objects.all().delete()
+        return Response("All Incomes & Expenses are Deleted Successfully", status=status.HTTP_200_OK)
+    return Response("User is not authenticated", status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['GET'])
 def tilesList(request):
     incomes = Income.objects.all()
     incomeSerializer = GetIncomeSerializer(incomes, many=True)
